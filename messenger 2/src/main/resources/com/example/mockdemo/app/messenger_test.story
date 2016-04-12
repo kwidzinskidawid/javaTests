@@ -4,11 +4,11 @@ Given a messenger where
 
 When server is valid and message is valid
 Then checking connection should return 0
-Then sending message should return code status 0
+And sending message should return code status 0 or 1
 
 When server is invalid and message is valid
 Then checking connection should return 1
-Then sending message should return code status 1
+And sending message should return code status 1
 
 When server is valid and message is invalid
 Then sending message should return code status 2

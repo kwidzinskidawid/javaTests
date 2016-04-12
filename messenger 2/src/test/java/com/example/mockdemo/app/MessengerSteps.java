@@ -67,13 +67,17 @@ public class MessengerSteps {
 	
     @Then("sending message should return code status $result")
 	public void checkSending(int result) throws MalformedRecipientException{
+    	
+			assertEquals(result, messenger.sendMessage(currentServer, currentMsg));
+			
+			verify(msMock, atLeastOnce()).send(currentServer, currentMsg);
+	}
+    
+    @Then("sending message should return code status $result or $result2")
+	public void checkSending(int result, int result2) throws MalformedRecipientException{
 
-			if (result == 0 ) {
-				assertThat(messenger.sendMessage(currentServer, currentMsg),
-						either(equalTo(0)).or(equalTo(1)));
-			} else {
-				assertEquals(result, messenger.sendMessage(currentServer, currentMsg));
-			}
+		assertThat(messenger.sendMessage(currentServer, currentMsg),
+				either(equalTo(result)).or(equalTo(result2)));
 			
 			verify(msMock, atLeastOnce()).send(currentServer, currentMsg);
 	}
