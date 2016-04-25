@@ -50,6 +50,11 @@ public class PracticeSteps {
     	assertTrue(pages.home().isErrorLabelVisible());
     }
     
+    @Then("error is not visible")
+    public void errorNotShown() {
+    	assertFalse(pages.home().hasErrorClass());
+    }
+    
     @When("user clicks alert")
     public void alertClicked() {
     	pages.home().clickAlert();

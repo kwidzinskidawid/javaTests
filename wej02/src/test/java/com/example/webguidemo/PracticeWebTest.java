@@ -36,7 +36,7 @@ public class PracticeWebTest extends JUnitStories {
     private ContextView contextView = new LocalFrameContextView().sized(500, 100);
 
     public PracticeWebTest() {
-    	System.setProperty("webdriver.chrome.driver", "/home/PJWSTK/s11995/Pobrane/chromedriver");
+    	System.setProperty("webdriver.chrome.driver", "C:\\Users\\Dave\\Downloads\\chromedriver\\chromedriver.exe");
 	}
 
 	@Override

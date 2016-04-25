@@ -1,12 +1,21 @@
 package com.example.webguidemo.pages;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
+import java.io.File;
+import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.io.FileUtils;
 import org.jbehave.web.selenium.WebDriverPage;
 import org.jbehave.web.selenium.WebDriverProvider;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoAlertPresentException;
+import org.openqa.selenium.OutputType;
+import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 
 public class Home extends WebDriverPage {
 
@@ -64,5 +73,20 @@ public class Home extends WebDriverPage {
 	    catch (NoAlertPresentException Ex) { 
 	        return false; 
 	    } 
+	}
+	
+	public boolean hasErrorClass() {
+		
+		File screenshot = ((TakesScreenshot)driver).getScreenshotAs(OutputType.FILE);
+	    assertNotNull(screenshot);
+		try {
+			FileUtils.copyFile(screenshot, new File("d:\\noerror.png"));
+		} catch (IOException e) {
+			e.printStackTrace();
+			assertTrue(false);
+		}
+		WebElement el = findElement(By.id("vfb-3"));
+
+		return el.getAttribute("class").contains("vfb-error");
 	}
 }

@@ -15,6 +15,9 @@ Then error is visible
 When user enters 333 to verification textbox
 Then error is visible
 
+When user enters 10 to verification textbox
+Then error is not visible
+
 When user clicks alert
 Then alert is shown
 
