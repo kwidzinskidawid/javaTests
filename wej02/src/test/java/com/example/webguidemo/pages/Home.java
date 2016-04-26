@@ -11,6 +11,7 @@ import org.apache.commons.io.FileUtils;
 import org.jbehave.web.selenium.WebDriverPage;
 import org.jbehave.web.selenium.WebDriverProvider;
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoAlertPresentException;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
@@ -21,6 +22,7 @@ public class Home extends WebDriverPage {
 
 	WebDriver driver;
 	String screenshotPath;
+
 	public Home(WebDriverProvider driverProvider) {
 		super(driverProvider);
 		driver = driverProvider.get();
@@ -31,6 +33,7 @@ public class Home extends WebDriverPage {
 	public void open() {
 		get("http://www.seleniumframework.com/Practiceform/");
 		manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
+
 	}
 
 	public void clickRadioButton(int n) {
@@ -65,7 +68,11 @@ public class Home extends WebDriverPage {
 	}
 	
 	public void clickAlert() {
-		findElement(By.id("alert")).click();
+		driver.navigate().refresh();
+		JavascriptExecutor jse = (JavascriptExecutor)driver;
+		WebElement el = findElement(By.xpath("//*[@id='alert']"));
+		jse.executeScript("arguments[0].click();", el);
+		
 	}
 	
 	public boolean isAlertVisible() {
