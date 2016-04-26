@@ -68,7 +68,6 @@ public class Home extends WebDriverPage {
 	}
 	
 	public void clickAlert() {
-		driver.navigate().refresh();
 		JavascriptExecutor jse = (JavascriptExecutor)driver;
 		WebElement el = findElement(By.xpath("//*[@id='alert']"));
 		jse.executeScript("arguments[0].click();", el);
