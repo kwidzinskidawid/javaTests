@@ -3,7 +3,11 @@ package com.example.webguidemo;
 import static java.util.Arrays.asList;
 import static org.jbehave.core.io.CodeLocations.codeLocationFromClass;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
+import java.util.Properties;
+import java.util.Set;
 
 import org.jbehave.core.Embeddable;
 import org.jbehave.core.configuration.Configuration;
@@ -36,7 +40,27 @@ public class PracticeWebTest extends JUnitStories {
     private ContextView contextView = new LocalFrameContextView().sized(500, 100);
 
     public PracticeWebTest() {
-    	System.setProperty("webdriver.chrome.driver", "C:\\Users\\Dave\\Downloads\\chromedriver\\chromedriver.exe");
+    	Properties properties = new Properties();
+    	InputStream is = null;
+    	
+    	try {
+    		is = getClass().getResourceAsStream("config.properties");
+    		if (is == null) {
+    			System.out.println("Error while loading properties file");
+    			return;
+    		}
+			properties.load(is);
+			
+			Set<Object> keys = properties.keySet();
+			for(Object k:keys){
+				System.setProperty((String) k, (String)properties.getProperty((String)k));
+			
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+    	System.setProperty("webdriver.chrome.driver", System.getProperty("driverLocation"));
 	}
 
 	@Override

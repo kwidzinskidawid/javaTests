@@ -20,9 +20,12 @@ import org.openqa.selenium.WebElement;
 public class Home extends WebDriverPage {
 
 	WebDriver driver;
+	String screenshotPath;
 	public Home(WebDriverProvider driverProvider) {
 		super(driverProvider);
 		driver = driverProvider.get();
+		
+		screenshotPath = System.getProperty("screenshotPath");
 	}
 
 	public void open() {
@@ -80,7 +83,7 @@ public class Home extends WebDriverPage {
 		File screenshot = ((TakesScreenshot)driver).getScreenshotAs(OutputType.FILE);
 	    assertNotNull(screenshot);
 		try {
-			FileUtils.copyFile(screenshot, new File("d:\\noerror.png"));
+			FileUtils.copyFile(screenshot, new File(screenshotPath));
 		} catch (IOException e) {
 			e.printStackTrace();
 			assertTrue(false);
