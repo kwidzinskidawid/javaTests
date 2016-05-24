@@ -23,6 +23,7 @@ public class Car {
 	public Car() {
 	}
 
+
 	public long getId() {
 		return id;
 	}

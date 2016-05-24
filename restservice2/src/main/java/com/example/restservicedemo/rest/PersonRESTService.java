@@ -1,5 +1,7 @@
 package com.example.restservicedemo.rest;
 
+import java.util.List;
+
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -26,12 +28,20 @@ public class PersonRESTService {
 		return p;
 	}
 	
+	@GET
+	@Path("/")
+	@Produces(MediaType.APPLICATION_JSON)
+	public List<Person> getPersons() {
+		List<Person> persons = pm.getAllPersons();
+		return persons;
+	}
+	
 	@POST
 	@Path("/")
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response addPerson(Person person){
 		pm.addPerson(person);
-		System.out.println("DODALEM PERSONA: " + person.getId());
+		System.out.println("New person added.");
 		return Response.status(201).entity("Person").build(); 
 	}
 	

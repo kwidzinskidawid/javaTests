@@ -1,9 +1,64 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Simple Service</title>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.3/jquery.min.js"></script>
+	<script src="script.js"></script>
+	<title>Simple Service</title>
 </head>
 <body>
- <h1>The service is running!</h1>
+ 	<h1>The service is running!</h1>
+ 	
+ 	 <form id="personForm">
+ 	 	<label for="idPerson">Id:</label>
+ 		<input id="idPerson" type="text">
+ 		<label for="name">First name:</label>
+ 		<input id="name" type="text">
+ 		<label for="yob">Year of birth:</label>
+  		<input id="yob" type="text">
+ 		<button id="addPerson" type="button">ADD</button>
+ 	</form>
+ 	
+ 	<table id="personTable">
+ 		<thead>
+ 			<tr>
+ 				<th>ID</th>
+ 				<th>FIRST NAME</th>
+ 				<th>YEAR OF BIRTH</th>
+ 			</tr>
+ 		</thead>
+ 		<tbody>
+ 		
+ 		</tbody>
+ 	</table>
+ 	
+ 	<form id="carForm">
+ 		<label for="idCar">Id:</label>
+ 		<input id="idCar" type="text">
+ 		<label for="make">Make:</label>
+ 		<input id="make" type="text">
+ 		<label for="model">Model:</label>
+  		<input id="model" type="text">
+  		<label for="yop">Year of production:</label>
+ 		<input id="yop" type="text">
+ 		<label for="owner">Owner:</label>
+ 		<select id="owner"></select>
+ 		<button id="addCar" type="button">ADD</button>
+ 	</form>
+ 	
+ 	<table id="carTable">
+ 		<thead>
+ 			<tr>
+ 				<th>ID</th>
+ 				<th>MAKE</th>
+ 				<th>MODEL</th>
+ 				<th>YEAR OF PRODUCTION</th>
+ 				<th>OWNER</th>
+ 			</tr>
+ 		</thead>
+ 		<tbody>
+ 		
+ 		</tbody>
+ 	</table>
+ 	
 </body>
 </html>

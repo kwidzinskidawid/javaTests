@@ -1,5 +1,7 @@
 package com.example.restservicedemo.rest;
 
+import java.util.List;
+
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -11,12 +13,15 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import com.example.restservicedemo.domain.Car;
+import com.example.restservicedemo.domain.Person;
 import com.example.restservicedemo.service.CarManager;
+import com.example.restservicedemo.service.PersonManager;
 
 @Path("car")
 public class CarRESTService {	
 	
-	CarManager cm = new CarManager();
+	private CarManager cm = new CarManager();
+	private PersonManager pm = new PersonManager();
 	
 	@GET
 	@Path("/{carId}")
@@ -26,13 +31,31 @@ public class CarRESTService {
 		return c;
 	}
 	
+	@GET
+	@Path("/byOwner/{ownerId}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public List<Car> getCarsByOwner(@PathParam("ownerId") Long id) {
+		Person owner = pm.getPerson(id);
+		
+		List<Car> cars = cm.getCarsByOwner(owner);
+		return cars;
+	}
+	
 	@POST
 	@Path("/")
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response addCar(Car car) {
 		cm.addCar(car);
-		System.out.println("DODALEM SAMOCHODA: " + car.getId());
+		System.out.println("New car added.");
 		return Response.status(201).entity("Car").build(); 
+	}
+	
+	@GET
+	@Path("/")
+	@Produces(MediaType.APPLICATION_JSON)
+	public List<Car> getPersons() {
+		List<Car> cars = cm.getAllCars();
+		return cars;
 	}
 
 	@DELETE

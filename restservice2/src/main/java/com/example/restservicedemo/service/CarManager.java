@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.example.restservicedemo.domain.Car;
+import com.example.restservicedemo.domain.Person;
 
 public class CarManager {
 	private Connection connection;
@@ -23,12 +24,13 @@ public class CarManager {
 	private PreparedStatement deleteAllCarsStmt;
 	private PreparedStatement getAllCarsStmt;
 	private PreparedStatement getCarByIdStmt;
+	private PreparedStatement getCarsByOwnerIdStmt;
 
 	private Statement statement;
 	
-	private PersonManager pm;
-
+	
 	public CarManager() {
+
 		try {
 			connection = DriverManager.getConnection(URL);
 			statement = connection.createStatement();
@@ -54,6 +56,8 @@ public class CarManager {
 					.prepareStatement("SELECT id, make, model, yop, o_id FROM Car");
 			getCarByIdStmt = connection
 					.prepareStatement("SELECT id, make, model, yop, o_id FROM Car where id = ?");
+			getCarsByOwnerIdStmt = connection
+					.prepareStatement("SELECT id, make, model, yop, o_id FROM Car where o_id = ?");
 
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -71,6 +75,29 @@ public class CarManager {
 			e.printStackTrace();
 		}
 	}
+	
+	public List<Car> getCarsByOwner(Person owner) {
+		List<Car> cars = new ArrayList<Car>();
+		try {
+			getCarsByOwnerIdStmt.setLong(1, owner.getId());
+			
+			ResultSet rs = getCarsByOwnerIdStmt.executeQuery();
+
+			while (rs.next()) {
+				Car c = new Car();
+				c.setId(rs.getLong("id"));
+				c.setMake(rs.getString("make"));
+				c.setModel(rs.getString("model"));
+				c.setYop(rs.getInt("yop"));	
+				c.setOwner(owner);
+				cars.add(c);
+			}
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return cars;
+	}
 
 	public int addCar(Car car) {
 		int count = 0;
@@ -82,7 +109,6 @@ public class CarManager {
 			addCarStmt.setLong(5, car.getOwner().getId());
 
 			count = addCarStmt.executeUpdate();
-
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -101,7 +127,9 @@ public class CarManager {
 				c.setMake(rs.getString("make"));
 				c.setModel(rs.getString("model"));
 				c.setYop(rs.getInt("yop"));
-				c.setOwner(pm.getPerson(rs.getLong("o_id")));
+				Person owner = new Person();
+				owner.setId(rs.getLong("o_id"));	
+				c.setOwner(owner);
 				cars.add(c);
 			}
 
@@ -122,7 +150,10 @@ public class CarManager {
 				c.setMake(rs.getString("make"));
 				c.setModel(rs.getString("model"));
 				c.setYop(rs.getInt("yop"));
-				c.setOwner(pm.getPerson(rs.getLong("o_id")));
+				Person owner = new Person();
+				owner.setId(rs.getLong("o_id"));	
+				c.setOwner(owner);
+
 				break;
 			}
 
