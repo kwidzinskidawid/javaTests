@@ -64,6 +64,13 @@ public class CarRESTService {
 		return Response.status(200).build();
 	}
 	
+	@DELETE
+	@Path("/drop")
+	public Response deleteCars(){
+		cm.deleteCars();
+		return Response.status(200).build();
+	}
+	
 	
 }
 

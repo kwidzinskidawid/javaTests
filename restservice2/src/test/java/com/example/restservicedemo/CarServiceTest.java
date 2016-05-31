@@ -32,6 +32,9 @@ public class CarServiceTest {
 		
 		testPerson = new Person(1, "David", 1993);
 		
+		delete("/car/drop").then().assertThat().statusCode(200);
+		delete("/person/drop").then().assertThat().statusCode(200);
+		
 		given().
 	       contentType("application/json").
 	       body(testPerson).

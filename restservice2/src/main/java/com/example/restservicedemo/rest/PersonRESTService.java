@@ -58,5 +58,12 @@ public class PersonRESTService {
 		pm.clearPersons();
 		return Response.status(200).build();
 	}
+	
+	@DELETE
+	@Path("/drop")
+	public Response deletePersons(){
+		pm.deletePersons();
+		return Response.status(200).build();
+	}
 
 }

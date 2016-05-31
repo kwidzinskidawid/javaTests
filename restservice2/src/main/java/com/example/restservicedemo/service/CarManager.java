@@ -25,8 +25,11 @@ public class CarManager {
 	private PreparedStatement getAllCarsStmt;
 	private PreparedStatement getCarByIdStmt;
 	private PreparedStatement getCarsByOwnerIdStmt;
+	private PreparedStatement deleteTableStmt;
 
 	private Statement statement;
+	
+	private PersonManager pm = new PersonManager();
 	
 	
 	public CarManager() {
@@ -52,6 +55,8 @@ public class CarManager {
 					.prepareStatement("INSERT INTO Car (id, make, model, yop, o_id) VALUES (?, ?, ?, ?, ?)");
 			deleteAllCarsStmt = connection
 					.prepareStatement("DELETE FROM Car");
+			deleteTableStmt = connection
+					.prepareStatement("DROP TABLE Car");
 			getAllCarsStmt = connection
 					.prepareStatement("SELECT id, make, model, yop, o_id FROM Car");
 			getCarByIdStmt = connection
@@ -71,6 +76,14 @@ public class CarManager {
 	public void clearCars() {
 		try {
 			deleteAllCarsStmt.executeUpdate();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void deleteCars() {
+		try {
+			deleteTableStmt.executeUpdate();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -128,7 +141,8 @@ public class CarManager {
 				c.setModel(rs.getString("model"));
 				c.setYop(rs.getInt("yop"));
 				Person owner = new Person();
-				owner.setId(rs.getLong("o_id"));	
+				//owner.setId(rs.getLong("o_id"));	
+				owner = pm.getPerson(rs.getLong("o_id"));
 				c.setOwner(owner);
 				cars.add(c);
 			}
@@ -151,7 +165,8 @@ public class CarManager {
 				c.setModel(rs.getString("model"));
 				c.setYop(rs.getInt("yop"));
 				Person owner = new Person();
-				owner.setId(rs.getLong("o_id"));	
+				owner = pm.getPerson(rs.getLong("o_id"));
+				
 				c.setOwner(owner);
 
 				break;

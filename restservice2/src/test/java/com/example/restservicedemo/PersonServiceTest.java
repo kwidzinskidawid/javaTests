@@ -28,6 +28,10 @@ public class PersonServiceTest {
 		RestAssured.baseURI = "http://localhost";
 		RestAssured.port = 8080;
 		RestAssured.basePath = "/restservicedemo/api";   	
+		
+		delete("/car/drop").then().assertThat().statusCode(200);
+		delete("/person/drop").then().assertThat().statusCode(200);
+		
     }
 	
 	@Test

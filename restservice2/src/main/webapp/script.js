@@ -20,14 +20,13 @@ $(function () {
 				}
 		});
 	};
+
 	
 	var getAllCars = function() {
-		console.log("test");
 		$.ajax({
 			  method: "GET",
 			  url: "http://localhost:8080/restservicedemo/api/car",
-			  success: function(data) {		
-				  console.log("tet2");
+			  success: function(data) {
 					$('#carTable tbody').html('');
 					$.each(data, function(key, value) {
 					    $('#carTable tbody').append("<tr>" + 
@@ -41,11 +40,15 @@ $(function () {
 				}
 		});
 	};
+		
 	
 	getAllPersons();
 	getAllCars();
-
-
+	
+	$('#refresh').click(function() {
+		getAllPersons();
+		getAllCars();
+	});
 	
 	$("#addPerson").click(function() {
 		$.ajax({
@@ -54,8 +57,10 @@ $(function () {
 			  data: JSON.stringify({ id: $("#idPerson").val(), firstName: $("#name").val(), yob: $("#yob").val() }),
 			  contentType: "application/json; charset=utf-8",
 			  dataType: "json"
+			}).done(function() {
+				getAllPersons();
 			});
-		getAllPersons();
+
 	});
 	
 	$("#addCar").click(function() {
@@ -66,7 +71,9 @@ $(function () {
 				  model: $("#model").val(), yop: $("#yop").val(), owner: { id: $("#owner").val()} }),
 			  contentType: "application/json; charset=utf-8",
 			  dataType: "json"
+			}).done(function() {
+				getAllCars();
 			});
-		getAllCars();
+
 	});
 });
