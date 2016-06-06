@@ -65,12 +65,25 @@ public class CarRESTService {
 	}
 	
 	@DELETE
+	@Path("/delete/{carId}")
+	public Response deletePerson(@PathParam("carId") Long id) {
+		cm.deleteCar(id);
+		return Response.status(200).build();
+	}
+	
+	@DELETE
 	@Path("/drop")
 	public Response deleteCars(){
 		cm.deleteCars();
 		return Response.status(200).build();
 	}
 	
+	
+	@GET
+	@Path("/init")
+	public Response init(){
+		return Response.status(200).build();
+	}
 	
 }
 

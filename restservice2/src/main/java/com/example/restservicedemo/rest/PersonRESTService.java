@@ -60,10 +60,22 @@ public class PersonRESTService {
 	}
 	
 	@DELETE
+	@Path("/delete/{personId}")
+	public Response deletePerson(@PathParam("personId") Long id) {
+		pm.deletePerson(id);
+		return Response.status(200).build();
+	}
+	
+	@DELETE
 	@Path("/drop")
 	public Response deletePersons(){
 		pm.deletePersons();
 		return Response.status(200).build();
 	}
 
+	@GET
+	@Path("/init")
+	public Response init(){
+		return Response.status(200).build();
+	}
 }

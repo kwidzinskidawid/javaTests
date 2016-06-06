@@ -24,6 +24,7 @@ public class CarManager {
 	private PreparedStatement deleteAllCarsStmt;
 	private PreparedStatement getAllCarsStmt;
 	private PreparedStatement getCarByIdStmt;
+	private PreparedStatement deleteCarStmt;
 	private PreparedStatement getCarsByOwnerIdStmt;
 	private PreparedStatement deleteTableStmt;
 
@@ -55,6 +56,8 @@ public class CarManager {
 					.prepareStatement("INSERT INTO Car (id, make, model, yop, o_id) VALUES (?, ?, ?, ?, ?)");
 			deleteAllCarsStmt = connection
 					.prepareStatement("DELETE FROM Car");
+			deleteCarStmt = connection
+					.prepareStatement("DELETE FROM Car WHERE id = ?");
 			deleteTableStmt = connection
 					.prepareStatement("DROP TABLE Car");
 			getAllCarsStmt = connection
@@ -76,6 +79,15 @@ public class CarManager {
 	public void clearCars() {
 		try {
 			deleteAllCarsStmt.executeUpdate();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void deleteCar(Long id) {
+		try {
+			deleteCarStmt.setLong(1, id);
+			deleteCarStmt.executeUpdate();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}

@@ -1,0 +1,11 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dataset>
+  <CAR ID="1" MAKE="Honda" MODEL="Civic" YOP="2010" O_ID="3"/>
+  <CAR ID="2" MAKE="Honda" MODEL="Accord" YOP="2011"/>
+  <CAR ID="3" MAKE="Opel" MODEL="Astra" YOP="2011" O_ID="1"/>
+  <PERSON ID="1" NAME="David" YOB="1993"/>
+  <PERSON ID="2" NAME="Andrzej" YOB="1979"/>
+  <PERSON ID="3" NAME="Mark" YOB="1981"/>
+  <PERSON ID="4" NAME="Stasiek" YOB="1921"/>
+  <PERSON ID="5" NAME="Henio" YOB="1991"/>
+</dataset>

@@ -3,14 +3,27 @@ package com.example.restservicedemo;
 import static com.jayway.restassured.RestAssured.delete;
 import static com.jayway.restassured.RestAssured.get;
 import static com.jayway.restassured.RestAssured.given;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalToIgnoringCase;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.sql.Connection;
+import java.sql.DriverManager;
 import java.util.Arrays;
 import java.util.List;
 
+import org.dbunit.Assertion;
+import org.dbunit.IDatabaseTester;
+import org.dbunit.JdbcDatabaseTester;
+import org.dbunit.database.DatabaseConnection;
+import org.dbunit.database.IDatabaseConnection;
+import org.dbunit.dataset.IDataSet;
+import org.dbunit.dataset.ITable;
+import org.dbunit.dataset.xml.FlatXmlDataSetBuilder;
+import org.dbunit.operation.DatabaseOperation;
+import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -19,38 +32,42 @@ import com.example.restservicedemo.domain.Person;
 import com.jayway.restassured.RestAssured;
 
 public class CarServiceTest {
-	
-	private static final String CAR_MODEL = "Fiesta";
-	
-	private static Person testPerson;
+
+	private static IDatabaseConnection connection ;
+	private static IDatabaseTester databaseTester;
 	
 	@BeforeClass
-	public static void setUp(){
+    public static void setUp() throws Exception{
 		RestAssured.baseURI = "http://localhost";
 		RestAssured.port = 8080;
-		RestAssured.basePath = "/restservicedemo/api";
+		RestAssured.basePath = "/restservicedemo/api"; 
 		
-		testPerson = new Person(1, "David", 1993);
+		get("/person/init");
+		get("/car/init");
+    }
+	
+	@Before
+	public void cleanInsert() throws Exception{
+		Connection jdbcConnection;
+		jdbcConnection = DriverManager.getConnection(
+				"jdbc:hsqldb:hsql://localhost/workdb", "sa", "");
+		connection = new DatabaseConnection(jdbcConnection);
 		
-		delete("/car/drop").then().assertThat().statusCode(200);
-		delete("/person/drop").then().assertThat().statusCode(200);
-		
-		given().
-	       contentType("application/json").
-	       body(testPerson).
-		when().	     
-			post("/person/").
-		then().
-			assertThat().statusCode(201);
-			
+		databaseTester = new JdbcDatabaseTester(
+				"org.hsqldb.jdbcDriver", "jdbc:hsqldb:hsql://localhost/workdb", "sa", "");
+		IDataSet dataSet = new FlatXmlDataSetBuilder().build(
+				new FileInputStream(new File("src/test/resources/fullData.xml")));
+		databaseTester.setSetUpOperation(DatabaseOperation.CLEAN_INSERT);
+		databaseTester.setDataSet(dataSet);
+		databaseTester.onSetup();
 	}
 	
 	@Test
-	public void addCars(){
+	public void addCars() throws Exception{
+		Person owner = new Person();
+		owner.setId(1);
 		
-		delete("/car/").then().assertThat().statusCode(200);
-		
-		Car aCar = new Car(1, "Ford", CAR_MODEL, 2011, testPerson);
+		Car aCar = new Car(3, "Opel", "Astra", 2011, owner);
 		given().
 		       contentType("application/json").
 		       body(aCar).
@@ -59,76 +76,64 @@ public class CarServiceTest {
 		then().
 			assertThat().statusCode(201);
 		
-		Car car = get("/car/1").as(Car.class);
+		IDataSet dbDataSet = connection.createDataSet();
+		ITable actualTable = dbDataSet.getTable("CAR");
 		
-		assertThat(CAR_MODEL, equalToIgnoringCase(car.getModel()));
+		IDataSet expectedDataSet = new FlatXmlDataSetBuilder().build(
+				new File("src/test/resources/addData.xml"));
+		ITable expectedTable = expectedDataSet.getTable("CAR");
+		
+		Assertion.assertEquals(expectedTable, actualTable);
 	}
 	
 	@Test
-	public void getCarsByOwner() {
-		delete("/car/").then().assertThat().statusCode(200);
+	public void getCarsByOwner() throws Exception{
 		
-		Car aCar = new Car(1, "Honda", "Civic", 2010, testPerson);
-		Car aCar2 = new Car(2, "Honda", "Accord", 2011, testPerson);
-		given().
-		       contentType("application/json").
-		       body(aCar).
-		when().	     
-			post("/car/").
-		then().
-			assertThat().statusCode(201);
+		List<Car> cars = Arrays.asList(get("/car/byOwner/3").as(Car[].class));
 		
-		given().
-	       contentType("application/json").
-	       body(aCar2).
-		when().	     
-			post("/car/").
-		then().
-			assertThat().statusCode(201);
+
+		IDataSet dataSet = new FlatXmlDataSetBuilder().build(
+				new FileInputStream(new File("src/test/resources/fullData.xml")));
+		ITable carTable = dataSet.getTable("CAR");
+		ITable personTable = dataSet.getTable("PERSON");
 		
+		assertEquals(1, cars.size());
 		
-		List<Car> cars = Arrays.asList(get("/car/byOwner/1").as(Car[].class));
-		
-		assertEquals(2, cars.size());
-		assertTrue(cars.get(0).getOwner().getFirstName().equals(testPerson.getFirstName()));
-		assertTrue(cars.get(0).getMake().equals(aCar.getMake()));
+		int owner_id = Integer.parseInt((String) carTable.getValue(0, "o_id" )) - 1;
+		assertEquals(cars.get(0).getOwner().getFirstName(), (String) personTable.getValue(owner_id, "name") );
+		assertTrue(cars.get(0).getOwner().getYob() == Integer.parseInt((String) personTable.getValue(owner_id, "yob")));
 	}
 	
 	
 	@Test
-	public void getCars() {
-		delete("/car/").then().assertThat().statusCode(200);
-		
-		Car aCar = new Car(1, "Ford", "Focus", 2010, testPerson);
-		Car aCar2 = new Car(2, "Ford", "Fiesta", 2011, testPerson);
-		Car aCar3 = new Car(3, "Ford", "Escort", 2001, testPerson);
-		given().
-		       contentType("application/json").
-		       body(aCar).
-		when().	     
-			post("/car/").
-		then().
-			assertThat().statusCode(201);
-		
-		given().
-	       contentType("application/json").
-	       body(aCar2).
-		when().	     
-			post("/car/").
-		then().
-			assertThat().statusCode(201);
-		
-		given().
-		       contentType("application/json").
-		       body(aCar3).
-		when().	     
-			post("/car/").
-		then().
-			assertThat().statusCode(201);
+	public void getCars() throws Exception{
+
 		
 		List<Car> cars = Arrays.asList(get("/car/").as(Car[].class));
-		assertEquals(3, cars.size());
-		assertTrue(cars.get(2).getYop() == aCar3.getYop());
+		assertEquals(2, cars.size());
+		
+		IDataSet dbDataSet = connection.createDataSet();
+		ITable actualTable = dbDataSet.getTable("CAR");
+		
+		assertEquals(cars.get(0).getModel(),(String)actualTable.getValue(0, "model"));
 	}
 	
+	@Test
+	public void deleteCar() throws Exception {
+		delete("/car/delete/2").then().assertThat().statusCode(200);
+		
+		IDataSet dbDataSet = connection.createDataSet();
+		ITable actualTable = dbDataSet.getTable("CAR");
+		
+		IDataSet expectedDataSet = new FlatXmlDataSetBuilder().build(
+				new File("src/test/resources/removeData.xml"));
+		ITable expectedTable = expectedDataSet.getTable("CAR");
+		
+		Assertion.assertEquals(expectedTable, actualTable);
+	}
+	
+	@AfterClass
+	public static void tearDown() throws Exception{
+		databaseTester.onTearDown();
+	}
 }

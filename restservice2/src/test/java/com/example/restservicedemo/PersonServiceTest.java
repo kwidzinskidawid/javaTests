@@ -3,16 +3,29 @@ package com.example.restservicedemo;
 import static com.jayway.restassured.RestAssured.delete;
 import static com.jayway.restassured.RestAssured.get;
 import static com.jayway.restassured.RestAssured.given;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalToIgnoringCase;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.sql.Connection;
+import java.sql.DriverManager;
 import java.util.Arrays;
 import java.util.List;
 
 import javax.ws.rs.core.MediaType;
 
+import org.dbunit.Assertion;
+import org.dbunit.IDatabaseTester;
+import org.dbunit.JdbcDatabaseTester;
+import org.dbunit.database.DatabaseConnection;
+import org.dbunit.database.IDatabaseConnection;
+import org.dbunit.dataset.IDataSet;
+import org.dbunit.dataset.ITable;
+import org.dbunit.dataset.xml.FlatXmlDataSetBuilder;
+import org.dbunit.operation.DatabaseOperation;
+import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -20,71 +33,105 @@ import com.example.restservicedemo.domain.Person;
 import com.jayway.restassured.RestAssured;
 
 public class PersonServiceTest {
-	
-	private static final String PERSON_FIRST_NAME = "David";
+
+	private static IDatabaseConnection connection ;
+	private static IDatabaseTester databaseTester;
 	
 	@BeforeClass
-    public static void setUp(){
+    public static void setUp() throws Exception{
 		RestAssured.baseURI = "http://localhost";
 		RestAssured.port = 8080;
-		RestAssured.basePath = "/restservicedemo/api";   	
+		RestAssured.basePath = "/restservicedemo/api"; 
 		
-		delete("/car/drop").then().assertThat().statusCode(200);
-		delete("/person/drop").then().assertThat().statusCode(200);
-		
+		get("/person/init");
+		get("/car/init");
     }
 	
-	@Test
-	public void addPersons(){		
-		Person person = new Person(1, PERSON_FIRST_NAME, 1976);
+	@Before
+	public void cleanInsert() throws Exception{
+		Connection jdbcConnection;
+		jdbcConnection = DriverManager.getConnection(
+				"jdbc:hsqldb:hsql://localhost/workdb", "sa", "");
+		connection = new DatabaseConnection(jdbcConnection);
 		
+		databaseTester = new JdbcDatabaseTester(
+				"org.hsqldb.jdbcDriver", "jdbc:hsqldb:hsql://localhost/workdb", "sa", "");
+		IDataSet dataSet = new FlatXmlDataSetBuilder().build(
+				new FileInputStream(new File("src/test/resources/fullData.xml")));
+		databaseTester.setSetUpOperation(DatabaseOperation.CLEAN_INSERT);
+		databaseTester.setDataSet(dataSet);
+		databaseTester.onSetup();
+	}
+	
+	@Test
+	public void addPersons() throws Exception{		
+		Person person = new Person(4, "Stasiek", 1921);
+		Person person2 = new Person(5, "Henio", 1991);
+
 		given().
 	       contentType(MediaType.APPLICATION_JSON).
 	       body(person).
 	    when().	     
 	    	post("/person/").
 	    then().assertThat().statusCode(201);
+		
+		given().
+	       contentType(MediaType.APPLICATION_JSON).
+	       body(person2).
+	    when().	     
+	    	post("/person/").
+	    then().assertThat().statusCode(201);
 				
-		Person rPerson = get("/person/1").as(Person.class);
+		IDataSet dbDataSet = connection.createDataSet();
+		ITable actualTable = dbDataSet.getTable("PERSON");
 		
-		assertThat(PERSON_FIRST_NAME, equalToIgnoringCase(rPerson.getFirstName()));
+		IDataSet expectedDataSet = new FlatXmlDataSetBuilder().build(
+				new File("src/test/resources/addData.xml"));
+		ITable expectedTable = expectedDataSet.getTable("PERSON");
 		
+		Assertion.assertEquals(expectedTable, actualTable);
 	}
 	
 	@Test
-	public void getCars() {
-		Person person = new Person(1, PERSON_FIRST_NAME, 1976);
-		Person person2 = new Person(2, "Andrzej", 1979);
-		Person person3 = new Person(3, "Mark", 1981);
-		given().
-		       contentType("application/json").
-		       body(person).
-		when().	     
-			post("/person/").
-		then().
-			assertThat().statusCode(201);
-		
-		given().
-	       contentType("application/json").
-	       body(person2).
-		when().	     
-			post("/person/").
-		then().
-			assertThat().statusCode(201);
-		
-		given().
-		       contentType("application/json").
-		       body(person3).
-		when().	     
-			post("/person/").
-		then().
-			assertThat().statusCode(201);
-		
+	public void getCars() throws Exception {
+				
 		List<Person> persons = Arrays.asList(get("/person/").as(Person[].class));
 		assertEquals(3, persons.size());
-		assertTrue(persons.get(2).getYob() == person3.getYob());
+		
+		IDataSet dbDataSet = connection.createDataSet();
+		ITable actualTable = dbDataSet.getTable("PERSON");
+		
+		assertTrue(persons.get(2).getYob() == (int)actualTable.getValue(2, "yob"));
 	}
 	
-
+	@Test
+	public void deleteCar() throws Exception {
+		delete("/person/delete/2").then().assertThat().statusCode(200);
+		
+		IDataSet dbDataSet = connection.createDataSet();
+		ITable actualTable = dbDataSet.getTable("PERSON");
+		
+		IDataSet expectedDataSet = new FlatXmlDataSetBuilder().build(
+				new File("src/test/resources/removeData.xml"));
+		ITable expectedTable = expectedDataSet.getTable("PERSON");
+		
+		Assertion.assertEquals(expectedTable, actualTable);
+	}
+	
+	@Test
+	public void getCar() throws Exception {
+				
+		Person person = get("/person/1").as(Person.class);
+		
+		IDataSet dbDataSet = connection.createDataSet();
+		ITable actualTable = dbDataSet.getTable("PERSON");
+		
+		assertEquals(person.getFirstName(),(String)actualTable.getValue(0, "name"));
+	}
+	
+	@AfterClass
+	public static void tearDown() throws Exception{
+		databaseTester.onTearDown();
+	}
 
 }

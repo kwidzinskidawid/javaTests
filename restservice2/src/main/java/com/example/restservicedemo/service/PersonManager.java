@@ -21,6 +21,7 @@ public class PersonManager {
 
 	private PreparedStatement addPersonStmt;
 	private PreparedStatement deleteAllPersonsStmt;
+	private PreparedStatement deletePersonStmt;
 	private PreparedStatement getAllPersonsStmt;
 	private PreparedStatement getPersonByIdStmt;
 	private PreparedStatement deleteTableStmt;
@@ -49,6 +50,8 @@ public class PersonManager {
 					.prepareStatement("INSERT INTO Person (id, name, yob) VALUES (?, ?, ?)");
 			deleteAllPersonsStmt = connection
 					.prepareStatement("DELETE FROM Person");
+			deletePersonStmt = connection
+					.prepareStatement("DELETE FROM Person WHERE id = ?");
 			deleteTableStmt = connection
 					.prepareStatement("DROP TABLE Person");
 			getAllPersonsStmt = connection
@@ -68,6 +71,15 @@ public class PersonManager {
 	public void clearPersons() {
 		try {
 			deleteAllPersonsStmt.executeUpdate();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void deletePerson(Long id) {
+		try {
+			deletePersonStmt.setLong(1, id);
+			deletePersonStmt.executeUpdate();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
