@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dataset>
+  <PERSON P_ID="1" FIRST_NAME="David" YOB="1993"/>
+  <PERSON P_ID="2" FIRST_NAME="Andrzej" YOB="1979"/>
+  <PERSON P_ID="3" FIRST_NAME="Mark" YOB="1981"/>
+  <CAR C_ID="1" MAKE="Honda" MODEL="Civic" YOP="2010" OWNER_ID="3"/>
+  <CAR C_ID="2" MAKE="Honda" MODEL="Accord" YOP="2011"/>
+</dataset>
